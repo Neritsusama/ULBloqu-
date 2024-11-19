@@ -6,13 +6,11 @@ def parse_game(game_file_path):
         with open(game_file_path, encoding="utf-8") as f:
             data = f.readlines()
     game = {}
-    with open(game_file_path, encoding="utf-8") as f:
-        data = f.readlines()
-        used_lines = [line.replace("|", "").strip() for line in data if '|' in line]
-        game["width"] = len(used_lines[0])  
-        game["height"] = len(used_lines)    
-        game["cars"] = get_cars_draft(used_lines)
-        game["max_moves"] = int(data[-1].strip()) 
+    used_lines = [line.replace("|", "").strip() for line in data if '|' in line]
+    game["width"] = len(used_lines[0])  
+    game["height"] = len(used_lines)    
+    game["cars"] = get_cars_draft(used_lines)
+    game["max_moves"] = int(data[-1].strip()) 
 
     return game
 
