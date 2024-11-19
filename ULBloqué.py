@@ -1,4 +1,13 @@
 # initialiser le jeu
+COLORS = [
+        "\u001b[47m",  # Blanc 
+        "\u001b[41m",  # Rouge
+        "\u001b[42m",  # Vert
+        "\u001b[43m",  # Jaune
+        "\u001b[44m",  # Bleu
+        "\u001b[45m",  # Magenta
+        "\u001b[46m",  # Cyan
+        ]
 #file_game
 def parse_game(game_file_path: str) -> dict:
     if "+" in game_file_path :
@@ -36,52 +45,36 @@ def get_cars_draft(map):
     return cars
 
 #affichage
+def get_car_letter(game: dict) -> list: #j'ai pas les lettres dans game donc je les prends ici
+    alphabet = [chr(i) for i in range(ord('A'), ord('Z') + 1)]
+    return [alphabet[i] for i in range(len(game["cars"]))]
 
 def get_game_str(game: dict, current_move_number: int) -> str:
-    """
-    Génère une chaîne de caractères représentant l'état actuel du plateau de jeu.
+    car_letters = get_car_letter(game)
 
-    Args:
-        game (dict): Dictionnaire contenant les informations sur le jeu, incluant
-                     les dimensions du plateau, les voitures et le nombre maximal de mouvements.
-        current_move_number (int): Nombre actuel de mouvements effectués.
-
-    Returns:
-        str: Chaîne de caractères représentant le plateau de jeu et le nombre de mouvements effectués.
-    """
-    # Couleurs des voitures, dans l'ordre cyclique
-    COLORS = [
-        "\u001b[47m",  # Blanc pour A
-        "\u001b[41m",  # Rouge
-        "\u001b[42m",  # Vert
-        "\u001b[43m",  # Jaune
-        "\u001b[44m",  # Bleu
-        "\u001b[45m",  # Magenta
-        "\u001b[46m",  # Cyan
-    ]
-    
     grid = [['.' for _ in range(game["width"])] for _ in range(game["height"])]
 
     for i, car in enumerate(game["cars"]):
         position, orientation, size = car
         x, y = position
-        color = COLORS[i % len(COLORS)]  # coul de la voiture, cyclique
+        letter = car_letters[i]  # lettre de la voiture tjr juste
+        color = COLORS[i % len(COLORS)]  # couleur cyclique
 
-        if orientation == 'h':  
-            for i in range(size):
-                grid[y][x + i] = f"{color}{car[0][0]}\u001b[0m"  
+        if orientation == 'h': 
+            for j in range(size):
+                grid[y][x + j] = f"{color}{letter}\u001b[0m" 
         elif orientation == 'v': 
-            for i in range(size):
-                grid[y + i][x] = f"{color}{car[0][0]}\u001b[0m"
+            for j in range(size):
+                grid[y + j][x] = f"{color}{letter}\u001b[0m" 
 
     lines = ["+" + "-" * game["width"] + "+"]
     for row in grid:
         lines.append("|" + "".join(row) + "|")
     lines.append("+" + "-" * game["width"] + "+")
-
     lines.append(f"Moves: {current_move_number}/{game['max_moves']}")
 
     return "\n".join(lines)
+
 
    
 game = parse_game("game1.txt")
