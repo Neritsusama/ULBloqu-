@@ -1,3 +1,7 @@
+from getkey import getkey
+from sys import argv
+import sys
+
 # initialiser le jeu
 COLORS = [
         "\u001b[47m",  # Blanc 
@@ -8,6 +12,7 @@ COLORS = [
         "\u001b[45m",  # Magenta
         "\u001b[46m",  # Cyan
         ]
+
 #file_game
 def parse_game(game_file_path: str) -> dict:
     if "+" in game_file_path :
@@ -49,23 +54,31 @@ def get_car_letter(game: dict) -> list: #j'ai pas les lettres dans game donc je 
     alphabet = [chr(i) for i in range(ord('A'), ord('Z') + 1)]
     return [alphabet[i] for i in range(len(game["cars"]))]
 
+def create_empty_grid(width: int, height: int) -> list:
+    return [['.' for _ in range(width)] for _ in range(height)]
+
+
+def add_car_to_grid(grid: list, car: list, letter: str, color: str):
+    position, orientation, size = car
+    x, y = position
+
+    if orientation == 'h':  # Horizontale
+        for i in range(size):
+            grid[y][x + i] = f"{color}{letter}\u001b[0m"
+    elif orientation == 'v':  # Verticale
+        for i in range(size):
+            grid[y + i][x] = f"{color}{letter}\u001b[0m"
+
+def add_all_cars_to_grid(game: dict, grid: list, car_letters: list) -> None:
+    for i, car in enumerate(game["cars"]):
+        letter = car_letters[i]
+        color = COLORS[i % len(COLORS)]
+        add_car_to_grid(grid, car, letter, color)
+
 def get_game_str(game: dict, current_move_number: int) -> str:
     car_letters = get_car_letter(game)
-
-    grid = [['.' for _ in range(game["width"])] for _ in range(game["height"])]
-
-    for i, car in enumerate(game["cars"]):
-        position, orientation, size = car
-        x, y = position
-        letter = car_letters[i]  # lettre de la voiture tjr juste
-        color = COLORS[i % len(COLORS)]  # couleur cyclique
-
-        if orientation == 'h': 
-            for j in range(size):
-                grid[y][x + j] = f"{color}{letter}\u001b[0m" 
-        elif orientation == 'v': 
-            for j in range(size):
-                grid[y + j][x] = f"{color}{letter}\u001b[0m" 
+    grid = create_empty_grid(game["width"], game["height"])
+    add_all_cars_to_grid(game, grid, car_letters)
 
     lines = ["+" + "-" * game["width"] + "+"]
     for row in grid:
@@ -75,14 +88,46 @@ def get_game_str(game: dict, current_move_number: int) -> str:
 
     return "\n".join(lines)
 
+def check_move(game, car_index, pos, direction):
+    x, y = pos
+    if direction == "DOWN" and 0 <= (y + 1) < game["height"]:
+        y += 1
+    elif direction == "UP" and 0 <= (y - 1) < game["height"]:
+        y -= 1
+    elif direction == "LEFT" and 0 <= (x - 1) < game["width"]:
+        x -= 1
+    elif direction == "RIGHT" and 0 <= (x + 1) < game["width"]:
+        x += 1
+    new_pos = (x, y)
+    game["cars"][car_index][0] = new_pos
+    return new_pos
 
-   
+def move_car(game: dict, car_index: int, direction: str) -> bool :
+    moved = False
+    x, y = game["cars"][car_index][0]
+    if check_move(game, car_index,(x, y), direction) != (x, y):
+        moved = True
+    return moved
+
+def get_player_pos(game):
+    return game["cars"][0][0]
+
+def get_exit_pos(carte_str: str):
+    lines = carte_str.splitlines()
+    lines = lines[1:-2]  
+    grid = [list(ligne) for ligne in lines]
+
+
+    # Recherche de la porte de sortie : dernière colonne sans '|'
+    for y, ligne in enumerate(grid):
+        if ligne[-1] != '|':  # Vérifie si le dernier caractère de la ligne n'est pas '|'
+            return (len(ligne) - 1, y)  # Retourner la position (ligne, colonne) de la porte
+
+    return None
+        
 game = parse_game("game1.txt")
-print(get_game_str(game, 40))
-#séléction de la cars
-#choix de la direction ou changement de de cars
-#Vérification 
-# Déplacement
-# Vérification de la victoire
-# Fin du jeu testtttt
-
+grid = create_empty_grid(game["width"], game["height"])
+car_letters = get_car_letter(game)
+add_all_cars_to_grid(game, grid, car_letters)
+carte_str = get_game_str(game, 40)
+print(carte_str)
