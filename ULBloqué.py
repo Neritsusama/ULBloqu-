@@ -109,25 +109,13 @@ def move_car(game: dict, car_index: int, direction: str) -> bool :
         moved = True
     return moved
 
-def get_player_pos(game):
-    return game["cars"][0][0]
-
-def get_exit_pos(carte_str: str):
-    lines = carte_str.splitlines()
-    lines = lines[1:-2]  
-    grid = [list(ligne) for ligne in lines]
-
-
-    # Recherche de la porte de sortie : dernière colonne sans '|'
-    for y, ligne in enumerate(grid):
-        if ligne[-1] != '|':  # Vérifie si le dernier caractère de la ligne n'est pas '|'
-            return (len(ligne) - 1, y)  # Retourner la position (ligne, colonne) de la porte
-
-    return None
+def is_win(game: dict) -> bool:
+    player_car_pos, orientation, size = game["cars"][0]
+    if orientation == 'h':  
+        car_end_pos = (player_car_pos[0] + size - 1, player_car_pos[1])
+    elif orientation == 'v': 
+        car_end_pos = (player_car_pos[0], player_car_pos[1] + size - 1)
         
-game = parse_game("game1.txt")
-grid = create_empty_grid(game["width"], game["height"])
-car_letters = get_car_letter(game)
-add_all_cars_to_grid(game, grid, car_letters)
-carte_str = get_game_str(game, 40)
-print(carte_str)
+    exit_pos = (game["width"] - 1, player_car_pos[1])
+
+    return car_end_pos == exit_pos
