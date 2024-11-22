@@ -88,6 +88,19 @@ def get_game_str(game: dict, current_move_number: int) -> str:
 
     return "\n".join(lines)
 
+def select_car(game):
+    car_letters = get_car_letter(game)
+
+    while True:
+        print(f"Choisissez une voiture parmi : {', '.join(car_letters)}")
+        selected_letter = getkey().upper()  # Lecture de l'entrée et transformation en majuscule
+
+        if selected_letter in car_letters:
+            car_index = car_letters.index(selected_letter)
+            return car_index
+        else:
+            print("Lettre invalide, essayez encore.")
+
 def check_move(game, car_index, pos, direction):
     x, y = pos
     if direction == "DOWN" and 0 <= (y + 1) < game["height"]:
@@ -109,13 +122,60 @@ def move_car(game: dict, car_index: int, direction: str) -> bool :
         moved = True
     return moved
 
+def apply_move(game):
+    car_index = select_car(game)
+    car_pos = game["cars"][car_index][0]
+    shift = getkey()
+    new_pos = check_move(game, car_index, car_pos, shift)
+    return new_pos
+
 def is_win(game: dict) -> bool:
     player_car_pos, orientation, size = game["cars"][0]
+
+    #extremité v ou h
     if orientation == 'h':  
         car_end_pos = (player_car_pos[0] + size - 1, player_car_pos[1])
     elif orientation == 'v': 
         car_end_pos = (player_car_pos[0], player_car_pos[1] + size - 1)
-        
-    exit_pos = (game["width"] - 1, player_car_pos[1])
+
+    exit_pos = (game["width"] - 1, player_car_pos[1]) # sortie tjr sur la mm ligne mais dernière case
 
     return car_end_pos == exit_pos
+
+def play_game(game: dict) -> int:
+    print(get_game_str(game, 0))  # Affichage initial
+
+    current_move_number = 0
+    max_moves = game["max_moves"]
+
+    """while True:
+            move = select_tetramino(nb_pieces)
+            movement(tetraminos, move, grid)
+            while not is_win(game):
+                move = select_tetramino(nb_pieces)
+                movement(tetraminos, move, grid)
+            print("Énigme résolue")
+
+        if key == 'ESCAPE':
+            print("Vous avez abandonné.")
+            return 2  # Code d'abandon
+
+        elif key in ["UP", "DOWN", "LEFT", "RIGHT"]:
+            # Logique pour déplacer la voiture dans la direction donnée
+            if move_car(game, car_index=0, direction=key):  # Exemple pour déplacer la première voiture
+                current_move_number += 1
+
+                
+
+                if current_move_number >= max_moves:
+                    print("Vous avez perdu. Nombre de mouvements dépassé.")
+                    return 1  # Code de défaite
+
+                print(get_game_str(game, current_move_number))
+            else:
+                print("Déplacement impossible.")
+        else:
+            print("Entrée invalide.")"""
+
+
+game = parse_game("game1.txt")
