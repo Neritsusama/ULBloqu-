@@ -153,49 +153,50 @@ def is_win(game: dict) -> bool:
 
     return car_end_pos == exit_pos
 
-def play_game(game: dict) -> int:
-    print(get_game_str(game, 0))  # Affichage initial
 
-    current_move_number = 0
-    max_moves = game["max_moves"]
+def play_game(game) -> int:
+    current_move = game["max_moves"]  
+    game = parse_game("game2.txt")  
+    print(get_game_str(game, current_move))  
+    selected_car_letter = None  
+    car_index = None 
 
-    """while True:
-            move = select_tetramino(nb_pieces)
-            movement(tetraminos, move, grid)
-            while not is_win(game):
-                move = select_tetramino(nb_pieces)
-                movement(tetraminos, move, grid)
-            print("Énigme résolue")
+    while not is_win(game):  # Boucle principale du jeu
+        print("Appuyez sur une lettre pour choisir une voiture, utilisez les flèches pour la déplacer, ou ESCAPE pour abandonner.")
+        input_key = getkey().upper() 
+        car_letters = get_car_letter(game) 
 
-        if key == 'ESCAPE':
-            print("Vous avez abandonné.")
-            return 2  # Code d'abandon
+        if input_key == "ESCAPE":
+            print("Vous avez abandonné la partie.")
+            return 2
+        
+        if input_key in car_letters:
+            selected_car_letter = input_key
+            car_index = car_letters.index(selected_car_letter)
+            print(f"Vous avez sélectionné la voiture : {selected_car_letter}")
 
-        elif key in ["UP", "DOWN", "LEFT", "RIGHT"]:
-            # Logique pour déplacer la voiture dans la direction donnée
-            if move_car(game, car_index=0, direction=key):  # Exemple pour déplacer la première voiture
-                current_move_number += 1
+        elif input_key in ["UP", "DOWN", "LEFT", "RIGHT"]:
+            if selected_car_letter is None:
+                print("Veuillez d'abord sélectionner une voiture.")
+            elif move_car(game, car_index, input_key):  # Si le mouvement est valide
+                current_move -= 1  # Décrémente les mouvements restants
+                print(get_game_str(game, current_move))  # Affiche la grille mise à jour
 
-                
+                if is_win(game):
+                    print("Félicitations, vous avez gagné !")
+                    return 0
 
-                if current_move_number >= max_moves:
-                    print("Vous avez perdu. Nombre de mouvements dépassé.")
-                    return 1  # Code de défaite
-
-                print(get_game_str(game, current_move_number))
+                if current_move <= 0:
+                    print("Mouvements épuisés. Vous avez perdu.")
+                    return 1
             else:
-                print("Déplacement impossible.")
+                print("Mouvement invalide. Essayez une autre direction.")
         else:
-            print("Entrée invalide.")"""
+            print("Touche invalide. Choisissez une lettre de voiture, une direction ou appuyez sur ESCAPE.")
+
+   
+    return 0
 
 
-current_move = 40
-game = parse_game("game1.txt")
-max_moves = game["max_moves"]
-print(get_game_str(game, current_move))
-while not is_win(game) :
-    car_index = select_car(game)
-    shift = choose_move()
-    while not move_car(game,car_index, shift) and g
-    move_car()
-  
+game = parse_game("game2.txt")
+suite = play_game(game)
