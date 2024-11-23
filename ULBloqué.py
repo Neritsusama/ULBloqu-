@@ -111,6 +111,8 @@ def check_move(game, car_index, pos, direction):
         x -= 1
     elif direction == "RIGHT" and 0 <= (x + 1) < game["width"]:
         x += 1
+    else : 
+        print("Mouvement hors-limite")
     new_pos = (x, y)
     game["cars"][car_index][0] = new_pos
     return new_pos
@@ -118,16 +120,25 @@ def check_move(game, car_index, pos, direction):
 def move_car(game: dict, car_index: int, direction: str) -> bool :
     moved = False
     x, y = game["cars"][car_index][0]
+    new_pos = check_move(game, car_index, (x, y), direction)
     if check_move(game, car_index,(x, y), direction) != (x, y):
+        game["cars"][car_index][0] = new_pos
         moved = True
     return moved
 
-def apply_move(game):
-    car_index = select_car(game)
-    car_pos = game["cars"][car_index][0]
-    shift = getkey()
-    new_pos = check_move(game, car_index, car_pos, shift)
-    return new_pos
+def choose_move() -> str:
+    print("Choisissez une direction :")
+    print("Flèches : UP, DOWN, LEFT, RIGHT")
+    print("ESC : Terminer (mouvements continus)")
+    
+    while True:
+        move = getkey().upper()  # Lecture de l'entrée utilisateur
+        if move in ["UP", "DOWN", "LEFT", "RIGHT", "ESCAPE"]:  # Valide les entrées acceptées
+            return move
+        else:
+            print("Entrée invalide. Essayez encore.")
+
+   
 
 def is_win(game: dict) -> bool:
     player_car_pos, orientation, size = game["cars"][0]
@@ -178,4 +189,13 @@ def play_game(game: dict) -> int:
             print("Entrée invalide.")"""
 
 
+current_move = 40
 game = parse_game("game1.txt")
+max_moves = game["max_moves"]
+print(get_game_str(game, current_move))
+while not is_win(game) :
+    car_index = select_car(game)
+    shift = choose_move()
+    while not move_car(game,car_index, shift) and g
+    move_car()
+  
