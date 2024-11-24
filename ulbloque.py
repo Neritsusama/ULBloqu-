@@ -1,6 +1,5 @@
 from getkey import getkey
 from sys import argv
-import sys
 
 # initialiser le jeu
 WIN = 0
@@ -65,10 +64,10 @@ def add_car_to_grid(grid: list, car: list, letter: str, color: str):
     position, orientation, size = car
     x, y = position
 
-    if orientation == 'h':  # Horizontale
+    if orientation == 'h': 
         for i in range(size):
             grid[y][x + i] = f"{color}{letter}\u001b[0m"
-    elif orientation == 'v':  # Verticale
+    elif orientation == 'v':
         for i in range(size):
             grid[y + i][x] = f"{color}{letter}\u001b[0m"
 
@@ -96,7 +95,7 @@ def select_car(game):
 
     while True:
         print(f"Choisissez une voiture parmi : {', '.join(car_letters)}")
-        selected_letter = getkey().upper()  # Lecture de l'entrée et transformation en majuscule
+        selected_letter = getkey().upper() 
 
         if selected_letter in car_letters:
             car_index = car_letters.index(selected_letter)
@@ -116,76 +115,61 @@ def is_collision(game, car_index, new_positions):
         other_size = other_car[2]
         other_positions = []
         
-        if other_orientation == "h":  # Horizontale
+        if other_orientation == "h": 
             other_positions = [(other_x + i, other_y) for i in range(other_size)]
-        elif other_orientation == "v":  # Verticale
+        elif other_orientation == "v":  
             other_positions = [(other_x, other_y + i) for i in range(other_size)]
 
-        # Vérifier les collisions
+       
         if any(pos in other_positions for pos in new_positions):
-            return True  # Collision détectée
-    return False  # Pas de collision
+            return True 
+    return False  
 
 def check_move(game, car_index, pos, direction):
-   
-   
     car = game["cars"][car_index]
     x, y = pos
-    orientation = car[1]  
-    size = car[2]         
+    orientation = car[1]
+    size = car[2]  
+
   
-  
-    if direction == "DOWN"and 0 <= (y + size) < game["height"]:
+    if direction == "DOWN" and orientation == "v"  and (y + size) < game["height"]:
         y += 1
-    elif direction == "UP" and 0 <= (y - 1) < game["height"]:
+    elif direction == "UP" and orientation == "v" and (y - 1) >= 0:
         y -= 1
-    elif direction == "LEFT" and 0 <= (x - 1) < game["width"]:
+    elif direction == "LEFT" and orientation == "h" and (x - 1) >= 0:
         x -= 1
-    elif direction == "RIGHT" and 0 <= (x + size) < game["width"]:
+    elif direction == "RIGHT" and orientation == "h" and (x + size) < game["width"]:
         x += 1
     else:
         print("Mouvement hors-limite")
-        return pos  # retourne la position actuelle si hors-limite
+        return pos  
 
-    # générer toutes les cases occupées par la voiture après le mouvement
-    new_positions = []
-    if orientation == "h":
-        new_positions = [(x + i, y) for i in range(size)]
-    elif orientation == "v": 
-        new_positions = [(x, y + i) for i in range(size)]
+   
+    new_positions = [
+        (x + i, y) if car[1] == "h" else (x, y + i)
+        for i in range(size)
+    ]
 
     if is_collision(game, car_index, new_positions):
         print("Mouvement invalide : une autre voiture bloque le chemin.")
         return pos  
+
+
     game["cars"][car_index][0] = (x, y)
     return (x, y)
+
 
 def move_car(game: dict, car_index: int, direction: str) -> bool :
     moved = False
     x, y = game["cars"][car_index][0]
     new_pos = check_move(game, car_index, (x, y), direction)
-    if check_move(game, car_index,(x, y), direction) != (x, y):
+    if new_pos != (x, y):
         game["cars"][car_index][0] = new_pos
         moved = True
     return moved
 
-def choose_move() -> str:
-    print("Choisissez une direction :")
-    print("Flèches : UP, DOWN, LEFT, RIGHT")
-    print("ESC : Terminer (mouvements continus)")
-    
-    while True:
-        move = getkey().upper()  # Lecture de l'entrée utilisateur
-        if move in ["UP", "DOWN", "LEFT", "RIGHT", "ESCAPE"]:  # Valide les entrées acceptées
-            return move
-        else:
-            print("Entrée invalide. Essayez encore.")
-
-   
-
 def is_win(game: dict) -> bool:
     player_car_pos, orientation, size = game["cars"][0]
-
     #extremité v ou h
     if orientation == 'h':  
         car_end_pos = (player_car_pos[0] + size - 1, player_car_pos[1])
@@ -199,18 +183,17 @@ def is_win(game: dict) -> bool:
 
 def play_game(game) -> int:
     current_move = game["max_moves"]  
-    game = parse_game("game3.txt")  
+    game = parse_game("game1.txt")
     print(get_game_str(game, current_move))  
     selected_car_letter = None  
     car_index = None 
 
-    while not is_win(game):  # Boucle principale du jeu
+    while not is_win(game): 
         print("Appuyez sur une lettre pour choisir une voiture, utilisez les flèches pour la déplacer, ou ESCAPE pour abandonner.")
         input_key = getkey().upper() 
         car_letters = get_car_letter(game) 
 
         if input_key == "ESCAPE":
-            print("Vous avez abandonné la partie.")
             return QUIT
         
         if input_key in car_letters:
@@ -221,19 +204,30 @@ def play_game(game) -> int:
         elif input_key in ["UP", "DOWN", "LEFT", "RIGHT"]:
             if selected_car_letter is None:
                 print("Veuillez d'abord sélectionner une voiture.")
-            elif move_car(game, car_index, input_key):  # Si le mouvement est valide
-                current_move -= 1  # Décrémente les mouvements restants
-                print(get_game_str(game, current_move))  # Affiche la grille mise à jour
-
+            elif move_car(game, car_index, input_key): 
+                current_move -= 1 
+                print(get_game_str(game, current_move)) 
+            
                 if is_win(game):
-                    print("Félicitations, vous avez gagné !")
                     return WIN
 
                 if current_move <= 0:
-                    print("Mouvements épuisés. Vous avez perdu.")
                     return LOSE
         else:
             print("Touche invalide. Choisissez une lettre de voiture, une direction ou appuyez sur ESCAPE.")
-
-   
     return WIN
+
+def main():
+    file_path = "game1.txt"
+    game = parse_game(file_path)
+    result = play_game(game)
+    if result == WIN:
+        print("Partie terminée : vous avez gagné !")
+    elif result == LOSE:
+        print("Partie terminée : vous avez perdu.")
+    elif result == QUIT:
+        print("Partie terminée : vous avez abandonné.")
+
+
+if __name__ == "__main__":
+    main()
