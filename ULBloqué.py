@@ -237,7 +237,3 @@ def play_game(game) -> int:
 
    
     return WIN
-
-
-game = parse_game("game3.txt")
-suite = play_game(game)
