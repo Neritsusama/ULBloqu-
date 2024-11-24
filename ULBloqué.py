@@ -3,6 +3,9 @@ from sys import argv
 import sys
 
 # initialiser le jeu
+WIN = 0
+LOSE = 1
+QUIT = 2    
 COLORS = [
         "\u001b[47m",  # Blanc 
         "\u001b[41m",  # Rouge
@@ -100,22 +103,62 @@ def select_car(game):
             return car_index
         else:
             print("Lettre invalide, essayez encore.")
+            
+def is_collision(game, car_index, new_positions):
+
+    for other_car_index, other_car in enumerate(game["cars"]):
+        if other_car_index == car_index:
+            continue  # ignore la voiture en cours de déplacement
+
+        # les cases occupées par l'autre voiture
+        other_x, other_y = other_car[0]
+        other_orientation = other_car[1]
+        other_size = other_car[2]
+        other_positions = []
+        
+        if other_orientation == "h":  # Horizontale
+            other_positions = [(other_x + i, other_y) for i in range(other_size)]
+        elif other_orientation == "v":  # Verticale
+            other_positions = [(other_x, other_y + i) for i in range(other_size)]
+
+        # Vérifier les collisions
+        if any(pos in other_positions for pos in new_positions):
+            return True  # Collision détectée
+    return False  # Pas de collision
 
 def check_move(game, car_index, pos, direction):
+   
+   
+    car = game["cars"][car_index]
     x, y = pos
-    if direction == "DOWN" and 0 <= (y + 1) < game["height"]:
+    orientation = car[1]  
+    size = car[2]         
+  
+  
+    if direction == "DOWN"and 0 <= (y + size) < game["height"]:
         y += 1
     elif direction == "UP" and 0 <= (y - 1) < game["height"]:
         y -= 1
     elif direction == "LEFT" and 0 <= (x - 1) < game["width"]:
         x -= 1
-    elif direction == "RIGHT" and 0 <= (x + 1) < game["width"]:
+    elif direction == "RIGHT" and 0 <= (x + size) < game["width"]:
         x += 1
-    else : 
+    else:
         print("Mouvement hors-limite")
-    new_pos = (x, y)
-    game["cars"][car_index][0] = new_pos
-    return new_pos
+        return pos  # retourne la position actuelle si hors-limite
+
+    # générer toutes les cases occupées par la voiture après le mouvement
+    new_positions = []
+    if orientation == "h":
+        new_positions = [(x + i, y) for i in range(size)]
+    elif orientation == "v": 
+        new_positions = [(x, y + i) for i in range(size)]
+
+    if is_collision(game, car_index, new_positions):
+        print("Mouvement invalide : une autre voiture bloque le chemin.")
+        return pos  
+    game["cars"][car_index][0] = (x, y)
+    return (x, y)
 
 def move_car(game: dict, car_index: int, direction: str) -> bool :
     moved = False
@@ -156,7 +199,7 @@ def is_win(game: dict) -> bool:
 
 def play_game(game) -> int:
     current_move = game["max_moves"]  
-    game = parse_game("game2.txt")  
+    game = parse_game("game3.txt")  
     print(get_game_str(game, current_move))  
     selected_car_letter = None  
     car_index = None 
@@ -168,7 +211,7 @@ def play_game(game) -> int:
 
         if input_key == "ESCAPE":
             print("Vous avez abandonné la partie.")
-            return 2
+            return QUIT
         
         if input_key in car_letters:
             selected_car_letter = input_key
@@ -184,19 +227,17 @@ def play_game(game) -> int:
 
                 if is_win(game):
                     print("Félicitations, vous avez gagné !")
-                    return 0
+                    return WIN
 
                 if current_move <= 0:
                     print("Mouvements épuisés. Vous avez perdu.")
-                    return 1
-            else:
-                print("Mouvement invalide. Essayez une autre direction.")
+                    return LOSE
         else:
             print("Touche invalide. Choisissez une lettre de voiture, une direction ou appuyez sur ESCAPE.")
 
    
-    return 0
+    return WIN
 
 
-game = parse_game("game2.txt")
+game = parse_game("game3.txt")
 suite = play_game(game)
