@@ -81,12 +81,16 @@ def get_game_str(game: dict, current_move_number: int) -> str:
     car_letters = get_car_letter(game)
     grid = create_empty_grid(game["width"], game["height"])
     add_all_cars_to_grid(game, grid, car_letters)
+    y_exit = game["cars"][0][0][1]
 
-    lines = ["+" + "-" * game["width"] + "+"]
-    for row in grid:
-        lines.append("|" + "".join(row) + "|")
+    lines = [f"Moves: {current_move_number}/{game['max_moves']}"]
     lines.append("+" + "-" * game["width"] + "+")
-    lines.append(f"Moves: {current_move_number}/{game['max_moves']}")
+    for y, row in  enumerate (grid):
+        if y == y_exit :
+            lines.append("|" + "".join(row) + "->")
+        else :
+            lines.append("|" + "".join(row) + "|")
+    lines.append("+" + "-" * game["width"] + "+")
 
     return "\n".join(lines)
 
@@ -141,7 +145,7 @@ def check_move(game, car_index, pos, direction):
     elif direction == "RIGHT" and orientation == "h" and (x + size) < game["width"]:
         x += 1
     else:
-        print("Mouvement hors-limite")
+        print("Mouvement impossible")
         return pos  
 
    
@@ -153,8 +157,7 @@ def check_move(game, car_index, pos, direction):
     if is_collision(game, car_index, new_positions):
         print("Mouvement invalide : une autre voiture bloque le chemin.")
         return pos  
-
-
+    
     game["cars"][car_index][0] = (x, y)
     return (x, y)
 
@@ -182,16 +185,16 @@ def is_win(game: dict) -> bool:
 
 
 def play_game(game) -> int:
-    current_move = game["max_moves"]  
-    game = parse_game("game1.txt")
+    current_move = 0
+    max_moves = game["max_moves"]  
     print(get_game_str(game, current_move))  
     selected_car_letter = None  
-    car_index = None 
+    car_index = None
 
-    while not is_win(game): 
+    while not is_win(game):
         print("Appuyez sur une lettre pour choisir une voiture, utilisez les flèches pour la déplacer, ou ESCAPE pour abandonner.")
         input_key = getkey().upper() 
-        car_letters = get_car_letter(game) 
+        car_letters = get_car_letter(game)
 
         if input_key == "ESCAPE":
             return QUIT
@@ -205,20 +208,21 @@ def play_game(game) -> int:
             if selected_car_letter is None:
                 print("Veuillez d'abord sélectionner une voiture.")
             elif move_car(game, car_index, input_key): 
-                current_move -= 1 
+                current_move += 1
                 print(get_game_str(game, current_move)) 
-            
+
                 if is_win(game):
                     return WIN
 
-                if current_move <= 0:
+                if current_move == max_moves:
                     return LOSE
         else:
             print("Touche invalide. Choisissez une lettre de voiture, une direction ou appuyez sur ESCAPE.")
+
     return WIN
 
 def main():
-    file_path = "game1.txt"
+    file_path = argv[1]
     game = parse_game(file_path)
     result = play_game(game)
     if result == WIN:
