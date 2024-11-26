@@ -39,8 +39,8 @@ def parse_game(game_file_path: str) -> dict:
     game = {}                                                   # initialise un dictionnaire pour stocker les données du jeu
     used_lines = [line.replace("|", "").strip() for line in data if '|' in line]  
                                                                 # supprime les caractères '|' et les espaces inutiles des lignes contenant un plateau
-    game["width"] = len(used_lines[0])                          # calcule la largeur du plateau en prenant la longueur d'une ligne
-    game["height"] = len(used_lines)                            # calcule la hauteur du plateau en comptant le nombre de lignes
+    game["width"] = len(used_lines[0])                          # largeur prenant la longueur d'une ligne
+    game["height"] = len(used_lines)                            # hauteur comptant le nombre de lignes
     game["cars"] = get_cars_draft(used_lines)                   # récupère les informations des voitures 
     game["max_moves"] = int(data[-1].strip())                   # convertit la dernière ligne en entier pour le nombre maximal de déplacements
 
@@ -51,7 +51,7 @@ def get_cars_draft(map):
     """
     but : extraire les informations sur les voitures du plateau de jeu et les retourner sous forme de liste.
     """
-    cars_draft = {}                                             # initialise un dictionnaire pour stocker les voitures et leurs positions
+    cars_draft = {}                                             
     for y, line in enumerate(map):                              # parcourt chaque ligne du plateau
         for x, letter in enumerate(line):                       # parcourt chaque lettre dans la ligne
             if letter.isalpha():                                # si la lettre est une lettre (voiture)
@@ -88,7 +88,7 @@ def add_car_to_grid(grid: list, car: list, letter: str, color: str):
     """
     but : ajouter une voiture sur le plateau en fonction de sa position, orientation et couleur.
     """
-    position, orientation, size = car                           # récupère la position, l'orientation et la taille de la voiture
+    position, orientation, size = car                           
     x, y = position                                             # extrait les coordonnées x et y de la position
 
     if orientation == 'h':                                      # si l'orientation est horizontale
@@ -121,16 +121,16 @@ def get_game_str(game: dict, current_move_number: int) -> str:
     car_letters = get_car_letter(game)                              # récupère les lettres des voitures
     grid = create_empty_grid(game["width"], game["height"])         # crée un plateau vide
     add_all_cars_to_grid(game, grid, car_letters)                   # ajoute toutes les voitures sur le plateau
-    y_exit = game["cars"][0][0][1]                                  # récupère la position y de la voiture 'A' (voiture de sortie)
+    y_exit = game["cars"][0][0][1]                                  # récupère la position y de la voiture 'A' pour la sortie
 
     lines = [f"Moves: {current_move_number}/{game['max_moves']}"]   # ajoute l'information du nombre de mouvements
-    lines.append("+" + "-" * game["width"] + "+")                   # ajoute une ligne de bordure en haut
-    for y, row in enumerate(grid):                                  # boucle à travers chaque ligne du plateau
-        if y == y_exit:  
-            lines.append("|" + "".join(row) + "->")                 # ajoute la flèche de sortie pour la voiture 'A'
-        else:
-            lines.append("|" + "".join(row) + "|")                  # ajoute une ligne normale du plateau
-    lines.append("+" + "-" * game["width"] + "+")                   # ajoute une ligne de bordure en bas
+    lines.append("┌" + "─" * game["width"] + "┐")                   # ajoute une ligne de bordure en haut
+    for y, row in enumerate(grid):                                  # boucle à travers chaque ligne du plateau               
+        if y == y_exit :  
+            lines.append("│" + "".join(row) + "-> EXIT")            # ajoute la flèche de sortie pour la voiture 'A'    
+        else:            
+            lines.append("│" + "".join(row) + "│")                  # ajoute une ligne normale du plateau
+    lines.append("└" + "─" * game["width"] + "┘")                   # ajoute une ligne de bordure en bas
 
     return "\n".join(lines)                                         # renvoie la chaîne représentant l'état du jeu
 
