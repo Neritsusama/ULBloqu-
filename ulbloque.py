@@ -270,6 +270,7 @@ def play_game(game) -> int:
                     return WIN
 
                 if current_move == max_moves:                                                                                       # vérifie si le joueur a atteint le nombre maximal de mouvements
+                    print("Plus de mouvements disponibles.")                                                                                      
                     return LOSE
         else:                                                                                                                       
             print("Touche invalide. Choisissez une lettre de voiture, une direction ou appuyez sur ESCAPE.")                        # gestion des touches invalides
