@@ -7,6 +7,7 @@ Projet :  ULBloqué : C’est un jeu à 1 joueur sur une grille donnée. Le but 
           permettre à une voiture de sortir du parking en déplaçant les voitures qui lui bloquent
           la route.
 """
+
 from getkey import getkey
 from sys import argv
 
@@ -72,7 +73,7 @@ def get_cars_draft(map):
     return cars                                                 # renvoie la liste des voitures
 
 
-def get_car_letter(game: dict) -> list:
+def get_car_letter(game):
     """
     but : générer une liste des lettres représentant les voitures du jeu.
     """
@@ -84,7 +85,7 @@ def create_empty_grid(width: int, height: int) -> list:
     return [['.' for _ in range(width)] for _ in range(height)]
 
 
-def add_car_to_grid(grid: list, car: list, letter: str, color: str):
+def add_car_to_grid(grid, car, letter, color):
     """
     but : ajouter une voiture sur le plateau en fonction de sa position, orientation et couleur.
     """
@@ -99,7 +100,7 @@ def add_car_to_grid(grid: list, car: list, letter: str, color: str):
             grid[y + i][x] = f"{color}{letter}\u001b[0m"        # ajoute la voiture à chaque case verticale
 
 
-def add_all_cars_to_grid(game: dict, grid: list, car_letters: list) -> None:
+def add_all_cars_to_grid(game, grid, car_letters) :
     """
     but : ajouter toutes les voitures sur le plateau en fonction de leurs lettres, couleurs et informations.
     """
@@ -168,8 +169,7 @@ def is_collision(game, car_index, new_positions):
             elif other_orientation == "v":                                                  # si l'orientation est verticale
                 other_positions = [(other_x, other_y + i) for i in range(other_size)]       # positions verticales
 
-                                                                                            # vérifie si collision avec les positions de l'autre voiture
-            if any(pos in other_positions for pos in new_positions):
+            if any(pos in other_positions for pos in new_positions):                        # vérifie si collision avec les positions de l'autre voiture
                 collide = True                                                              # il y a collision
     return collide                                                                          # renvoie si une collision a été détectée
 
@@ -196,10 +196,9 @@ def check_move(game, car_index, pos, direction):
         print("Mouvement impossible")                                               # affiche un message d'erreur si le mouvement est invalide
         return pos                                                                  # retourne la position initiale si le mouvement est invalide
         
-                                                                                    # calcule les nouvelles positions de la voiture après le mouvement
-    new_positions = [(x + i, y) if car[1] == "h" else (x, y + i) for i in range(size)]
-
-                                                                                     
+                                                                                    
+    new_positions = [(x + i, y) if car[1] == "h" else (x, y + i) for i in range(size)] # calcule les nouvelles positions de la voiture après le mouvement
+                                                                 
     if is_collision(game, car_index, new_positions):                                # vérifie s'il y a une collision
         print("Mouvement invalide : une autre voiture bloque le chemin.")           # message d'erreur en cas de collision
         return pos                                                                  # retourne la position initiale si collision
@@ -207,7 +206,7 @@ def check_move(game, car_index, pos, direction):
     return (x, y)                                                                   # renvoie la nouvelle position de la voiture
 
 
-def move_car(game: dict, car_index: int, direction: str) -> bool:
+def move_car(game, car_index: int, direction: str) -> bool:
     """
     but : déplacer une voiture selon la direction donnée si le mouvement est valide.
     """
@@ -236,7 +235,7 @@ def is_win(game: dict) -> bool:
     return car_end_pos == exit_pos                                                 # renvoie True si l'extrémité de la voiture est à la position de la sortie
 
 
-def play_game(game) -> int:
+def play_game(game : dict) -> int:
     """
     but : gérer le déroulement du jeu, permettre au joueur de déplacer ses voitures et vérifier si la victoire ou la défaite a été atteinte.
     """
